@@ -1,7 +1,6 @@
 package ru.skillbranch.gameofthrones.ui.character
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -59,7 +58,6 @@ class CharacterFragment : Fragment() {
                     )
                 }
                 toast.show()
-                Log.d("onViewCreated", "is_bookmarked: $state changed to ${!state}")
 
                 characterViewModel.setBookmarked()
                 val action = CharacterFragmentDirections.actionNavCharacterSelf(
@@ -97,32 +95,11 @@ class CharacterFragment : Fragment() {
         val scrimDark = houseType.darkColor
 
         val rootActivity = requireActivity() as RootActivity
-//        rootActivity.setSupportActionBar(toolbar)
-//        rootActivity.invalidateOptionsMenu()
-//        toolbar.setNavigationIcon(R.drawable.ic_back)
-//        toolbar.inflateMenu(R.menu.menu_character)
-//        toolbar.setOnMenuItemClickListener { item ->
-//            when (item.itemId) {
-//                R.id.action_add_favorite ->  {
-//                    Toast.makeText(requireActivity(), "Added",
-//                        Toast.LENGTH_SHORT).show()
-//                    val state = characterViewModel.getCharacter().value?.isBookmarked ?: false
-//                    Log.d("onViewCreated", "is_bookmarked: $state changed to ${!state}")
-//                     characterViewModel.setBookmarked(!state)
-//                }
-//                else -> false
-//            }
-//            true
-//        }
-//        toolbar.setNavigationOnClickListener {
-//            rootActivity.onBackPressed()
-//        }
         rootActivity.setSupportActionBar(toolbar)
         rootActivity.supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             title = args.title
         }
-//        val item = menu. .id.action_add_favorite)
         iv_arms.setImageResource(arms)
         with(collapsing_layout) {
             setBackgroundResource(scrim)
@@ -161,7 +138,6 @@ class CharacterFragment : Fragment() {
                         )
                     btn_father.setOnClickListener { findNavController().navigate(action) }
                 }
-                //Log.d("character", "characterInfo: $character")
                 character.mother?.let {
                     group_mother.visibility = View.VISIBLE
                     btn_mother.text = it.name
@@ -187,7 +163,6 @@ class CharacterFragment : Fragment() {
     }
 
     fun toggleIcon(state: Boolean, item: MenuItem) {
-        Log.d("onViewCreated", "is_bookmarked: ${state}")
         if (state)
             item.setIcon(R.drawable.ic_bookmarked_24)
         else

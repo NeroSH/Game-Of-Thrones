@@ -103,7 +103,6 @@ object RootRepository {
         withContext(Dispatchers.IO) {
             val char = characterDao.findCharacterObject(characterId)
             char.isBookmarked = !char.isBookmarked
-//            characterDao.setBookmarked(characterId, state)
             characterDao.updateCharacter(char)
         }
     }

@@ -20,6 +20,14 @@ class HouseViewModel(private val houseName: String) : ViewModel() {
         }
     }
 
+    fun getFavoriteCharacters(): LiveData<List<CharacterItem>> {
+        val characters = repository.getCharactersByTitle(houseName)
+        return characters.combineAndCompute(queryString) { list, query ->
+            if (query.isEmpty()) list.filter { it.isBookmarked }
+            else list.filter { it.name.contains(query, true) && it.isBookmarked }
+        }
+    }
+
     fun handleSearchQuery(searchStr: String) {
         queryString.value = searchStr
     }

@@ -4,10 +4,14 @@ import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.*
+import android.widget.CheckedTextView
 import android.widget.SearchView
 import androidx.annotation.ColorInt
 import androidx.core.animation.doOnEnd
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import androidx.navigation.navOptions
 import com.google.android.material.tabs.TabLayout
 import kotlinx.android.synthetic.main.fragment_houses.*
 import ru.skillbranch.gameofthrones.R
@@ -19,9 +23,10 @@ import kotlin.math.max
  * A simple [Fragment] subclass.
  */
 class HousesFragment : Fragment() {
-
+    private val args: HousesFragmentArgs by navArgs()
     private lateinit var colors: Array<Int>
     private lateinit var housesPageAdapter: HousesPageAdapter
+    private var showBookmarked: Boolean = false
 
     @ColorInt
     private var currentColor: Int = -1
@@ -29,8 +34,8 @@ class HousesFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-
-        housesPageAdapter = HousesPageAdapter(childFragmentManager)
+        showBookmarked = args.showOnlyFavorite
+        housesPageAdapter = HousesPageAdapter(childFragmentManager, showBookmarked)
         colors = requireContext().run {
             arrayOf(
                 getColor(R.color.stark_primary),
@@ -49,17 +54,30 @@ class HousesFragment : Fragment() {
         with(menu.findItem(R.id.action_search)?.actionView as SearchView) {
             queryHint = "Search character"
         }
+        with(menu.findItem(R.id.action_favorites)?.actionView as CheckedTextView) {
+            isChecked = showBookmarked
+
+            if (isChecked) setCheckMarkDrawable(R.drawable.ic_checked_24)
+            else setCheckMarkDrawable(R.drawable.ic_not_checked_24)
+        }
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_favorites -> {
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
+                with(item.actionView as CheckedTextView) {
+                    showBookmarked = !isChecked
 
+                    val action = HousesFragmentDirections.actionNavHousesSelf(showBookmarked)
+                    findNavController().navigate(action, navOptions {
+                        launchSingleTop = true
+                    })
+                }
+            }
         }
+        return super.onOptionsItemSelected(item)
+    }
 
 
     override fun onCreateView(
@@ -128,4 +146,5 @@ class HousesFragment : Fragment() {
         }
         currentColor = colors[position]
     }
+
 }
