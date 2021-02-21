@@ -24,11 +24,12 @@ class HousesFragment : Fragment() {
     private lateinit var housesPageAdapter: HousesPageAdapter
 
     @ColorInt
-    private  var currentColor: Int = -1
+    private var currentColor: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+
         housesPageAdapter = HousesPageAdapter(childFragmentManager)
         colors = requireContext().run {
             arrayOf(
@@ -48,9 +49,18 @@ class HousesFragment : Fragment() {
         with(menu.findItem(R.id.action_search)?.actionView as SearchView) {
             queryHint = "Search character"
         }
-
         super.onCreateOptionsMenu(menu, inflater)
     }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
+        when (item.itemId) {
+            R.id.action_favorites -> {
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+
+        }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,19 +74,19 @@ class HousesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         (requireActivity() as RootActivity).setSupportActionBar(toolbar)
 
-        if(currentColor != -1)
+        if (currentColor != -1)
             appbar.setBackgroundColor(currentColor)
         view_pager.adapter = housesPageAdapter
         with(tabs) {
             setupWithViewPager(view_pager)
-            addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
+            addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
                 override fun onTabReselected(p0: TabLayout.Tab?) {}
                 override fun onTabUnselected(p0: TabLayout.Tab?) {}
 
                 override fun onTabSelected(tab: TabLayout.Tab?) {
                     val position = tab?.position ?: 0
 
-                    if((appbar.background as ColorDrawable).color != colors[position]){
+                    if ((appbar.background as ColorDrawable).color != colors[position]) {
                         val rect = Rect()
                         val tabView = tab?.view as View
                         tabView.postDelayed(
@@ -99,7 +109,7 @@ class HousesFragment : Fragment() {
             hypot(centerX.toDouble(), centerY.toDouble()),
             hypot(appbar.width.toDouble() - centerX.toDouble(), centerY.toDouble())
         )
-        with(reveal_view){
+        with(reveal_view) {
             visibility = View.VISIBLE
             setBackgroundColor(colors[position])
         }

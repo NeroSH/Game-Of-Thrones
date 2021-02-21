@@ -18,6 +18,7 @@ object DbManager {
     val db = Room.databaseBuilder(
         App.applicationContext(),
         AppDatabase::class.java, AppDatabase.DATABASE_NAME)
+        .fallbackToDestructiveMigration()
         .build()
 }
 
@@ -32,7 +33,7 @@ object DbManager {
 abstract class AppDatabase : RoomDatabase() {
     companion object {
         const val DATABASE_NAME = BuildConfig.APPLICATION_ID + ".db"
-        const val DATABASE_VERSION = 1
+        const val DATABASE_VERSION = 2
     }
 
     abstract fun houseDao() : HouseDao

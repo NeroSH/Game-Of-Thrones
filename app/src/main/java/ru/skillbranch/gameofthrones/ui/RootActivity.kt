@@ -27,7 +27,7 @@ class RootActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        return  navController.navigateUp()
+        return navController.navigateUp()
     }
 
     private fun prepareData() {

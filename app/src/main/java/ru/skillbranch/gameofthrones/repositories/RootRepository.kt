@@ -99,6 +99,14 @@ object RootRepository {
         return characterDao.findCharacters(title)
     }
 
+    suspend fun setBookmarked(characterId: String) {
+        withContext(Dispatchers.IO) {
+            val char = characterDao.findCharacterObject(characterId)
+            char.isBookmarked = !char.isBookmarked
+//            characterDao.setBookmarked(characterId, state)
+            characterDao.updateCharacter(char)
+        }
+    }
 
     fun getCharacter(characterId: String): LiveData<CharacterFull> {
         return characterDao.findCharacter(characterId)
@@ -185,7 +193,7 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun findCharactersByHouseName(name: String, result: (characters: List<CharacterItem>) -> Unit) {
-        var list: List<CharacterItem> = listOf()
+        var list: List<CharacterItem>
         scope.launch {
             list = characterDao.findCharacterList(name)
             result(list)

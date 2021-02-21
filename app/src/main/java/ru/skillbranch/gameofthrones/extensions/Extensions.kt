@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 
 
+@Suppress("DEPRECATION")
 val Context.isNetworkAvailable: Boolean
     get() {
         val cm : ConnectivityManager =

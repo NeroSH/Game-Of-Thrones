@@ -3,6 +3,8 @@ package ru.skillbranch.gameofthrones.ui.character
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterFull
 import ru.skillbranch.gameofthrones.repositories.RootRepository
 
@@ -12,6 +14,12 @@ class CharacterViewModel(private val characterId: String) : ViewModel() {
     //    fun getCharacter() : LiveData<CharacterFull> = repository.getCharacter(characterId)
     fun getCharacter(): LiveData<CharacterFull> {
         return repository.getCharacter(characterId)
+    }
+
+    fun setBookmarked() {
+        viewModelScope.launch {
+            repository.setBookmarked(characterId)
+        }
     }
 
 }

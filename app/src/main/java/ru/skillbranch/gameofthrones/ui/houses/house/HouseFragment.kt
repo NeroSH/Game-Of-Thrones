@@ -32,7 +32,7 @@ class HouseFragment : Fragment() {
         val houseName = arguments?.getString(HOUSE_NAME) ?: HouseType.STARK.title
         val vmFactory = HouseViewModelFactory(houseName)
         charactersAdapter = CharactersAdapter {
-            val action =  HousesFragmentDirections.actionNavHousesToNavCharacter(it.id, it.house.title, it.name)
+            val action =  HousesFragmentDirections.actionNavHousesToNavCharacter(it.id, it.house.title, it.name, it.isBookmarked)
             findNavController().navigate(action)
         }
         houseViewModel = ViewModelProviders.of(this,vmFactory).get(HouseViewModel::class.java)

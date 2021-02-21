@@ -4,9 +4,10 @@ import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
+import ru.skillbranch.gameofthrones.data.local.entities.Character
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterFull
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterItem
-import ru.skillbranch.gameofthrones.data.local.entities.Character
 
 @Dao
 interface CharacterDao : BaseDao<Character> {
@@ -22,6 +23,9 @@ interface CharacterDao : BaseDao<Character> {
     @Query("SELECT * FROM CharacterFull WHERE id = :characterId")
     fun findCharacterFull(characterId: String) : CharacterFull
 
+    @Query("SELECT * FROM characters WHERE id = :characterId")
+    fun findCharacterObject(characterId: String) : Character
+
     //    fun findCharacterLiveData(characterId: String) : LiveData<Character>
     @Query("DELETE FROM characters")
     fun deleteTable()
@@ -33,4 +37,10 @@ interface CharacterDao : BaseDao<Character> {
             .filterNotNull()
             .also { if (it.isNotEmpty()) update(it) }
     }
+
+    @Update
+    fun updateCharacter(character: Character)
+
+    @Query("UPDATE characters SET is_bookmarked = :state WHERE id = :characterId")
+    fun setBookmarked(characterId: String, state: Boolean)
 }

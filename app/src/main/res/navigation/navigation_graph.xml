@@ -41,5 +41,9 @@
         <action
             android:id="@+id/action_nav_character_self"
             app:destination="@id/nav_character" />
+        <argument
+            android:name="isBookmarked"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </fragment>
 </navigation>
