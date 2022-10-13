@@ -12,8 +12,8 @@ android {
         applicationId "ru.skillbranch.gameofthrones"
         minSdkVersion 23
         targetSdkVersion 33
-        versionCode 2
-        versionName "2.0"
+        versionCode 3_0_1
+        versionName "3.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -25,10 +25,13 @@ android {
         }
         release {
             debuggable false
-            minifyEnabled false
+            jniDebuggable false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
@@ -43,7 +46,7 @@ dependencies {
     implementation "androidx.core:core-ktx:$android_core_ctx"
     implementation "androidx.constraintlayout:constraintlayout:$constaint_layout"
 
-    // Fragement
+    // Fragment
     implementation "androidx.fragment:fragment-ktx:$fragment"
     debugImplementation "androidx.fragment:fragment-testing:$fragment"
 
@@ -79,11 +82,8 @@ dependencies {
     implementation "androidx.room:room-ktx:$room"
     kapt "androidx.room:room-compiler:$room"
 
-    // stecho
-//    implementation 'com.facebook.stetho:stetho:1.6.0'
-
     // viewBinding
-    implementation "com.github.kirich1409:viewbindingpropertydelegate-noreflection:1.4.7"
+    implementation "com.github.kirich1409:viewbindingpropertydelegate-noreflection:$viewbinding_property_delegate"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
