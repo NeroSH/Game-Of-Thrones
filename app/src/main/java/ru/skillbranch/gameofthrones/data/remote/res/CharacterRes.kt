@@ -37,9 +37,12 @@ data class CharacterRes(
     val tvSeries: List<String> = listOf(),
     @Json(name = "playedBy")
     val playedBy: List<String> = listOf()
+//    @Json(name = "isBookmarked")
+//    var isBookmarked: Boolean = false
 ) : IRes {
     lateinit var houseId: String
     override val id: String get() = url.lastSegment()
+    override var isBookmarked: Boolean = false
     val fatherId get() = father.lastSegment()
     val motherId get() = mother.lastSegment()
 
@@ -56,7 +59,8 @@ data class CharacterRes(
             father,
             mother,
             spouse,
-            HouseType.fromString(houseId)
+            HouseType.fromString(houseId),
+            isBookmarked
         )
     }
 }

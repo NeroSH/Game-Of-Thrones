@@ -1,9 +1,11 @@
 package ru.skillbranch.gameofthrones.repositories
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import kotlinx.coroutines.*
 import ru.skillbranch.gameofthrones.AppConfig
+import ru.skillbranch.gameofthrones.BuildConfig
 import ru.skillbranch.gameofthrones.data.local.DbManager
 import ru.skillbranch.gameofthrones.data.local.dao.CharacterDao
 import ru.skillbranch.gameofthrones.data.local.dao.HouseDao
@@ -24,7 +26,7 @@ object RootRepository {
         DbManager.db.characterDao()
     }
     private val errHandler = CoroutineExceptionHandler { _, exception ->
-        //Log.d("coroutineError", "Caught $exception")
+        Log.d("Error", "Caught $exception")
         exception.printStackTrace()
     }
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO + errHandler)
@@ -62,7 +64,12 @@ object RootRepository {
                             .apply { houseId = house.shortName }
                             .also { characters.add(it) }
                         i++
-                        println("complete coroutine $i/${house.swornMembers.size} ${house.name}")
+                        if (BuildConfig.DEBUG) {
+                            Log.d(
+                                "fetching house",
+                                "complete coroutine $i/${house.swornMembers.size} ${house.name}"
+                            )
+                        }
                     }
                 }
             }
@@ -99,6 +106,13 @@ object RootRepository {
         return characterDao.findCharacters(title)
     }
 
+    suspend fun setBookmarked(characterId: String) {
+        withContext(Dispatchers.IO) {
+            val char = characterDao.findCharacterObject(characterId)
+            char.isBookmarked = !char.isBookmarked
+            characterDao.updateCharacter(char)
+        }
+    }
 
     fun getCharacter(characterId: String): LiveData<CharacterFull> {
         return characterDao.findCharacter(characterId)
@@ -185,7 +199,7 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun findCharactersByHouseName(name: String, result: (characters: List<CharacterItem>) -> Unit) {
-        var list: List<CharacterItem> = listOf()
+        var list: List<CharacterItem>
         scope.launch {
             list = characterDao.findCharacterList(name)
             result(list)

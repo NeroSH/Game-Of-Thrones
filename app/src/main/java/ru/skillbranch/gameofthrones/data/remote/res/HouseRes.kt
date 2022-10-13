@@ -39,7 +39,7 @@ data class HouseRes(
     @Json(name = "swornMembers")
     val swornMembers: List<String> = listOf()
 ) : IRes {
-
+    override var isBookmarked: Boolean = false
     override val id: String
         get() = url.lastSegment()
 

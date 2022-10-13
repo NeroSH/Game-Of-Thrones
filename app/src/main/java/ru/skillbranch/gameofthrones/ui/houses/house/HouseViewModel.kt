@@ -20,16 +20,25 @@ class HouseViewModel(private val houseName: String) : ViewModel() {
         }
     }
 
+    fun getFavoriteCharacters(): LiveData<List<CharacterItem>> {
+        val characters = repository.getCharactersByTitle(houseName)
+        return characters.combineAndCompute(queryString) { list, query ->
+            if (query.isEmpty()) list.filter { it.isBookmarked }
+            else list.filter { it.name.contains(query, true) && it.isBookmarked }
+        }
+    }
+
     fun handleSearchQuery(searchStr: String) {
         queryString.value = searchStr
     }
 }
 
+@Suppress("UNCHECKED_CAST")
 class HouseViewModelFactory(private val houseName: String) : ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(HouseViewModel::class.java)) {
             return HouseViewModel(houseName) as T
         }
-        throw  IllegalArgumentException("unknown ViewModel class")
+        throw IllegalArgumentException("unknown ViewModel class")
     }
 }

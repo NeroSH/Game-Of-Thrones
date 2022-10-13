@@ -24,6 +24,13 @@
         <action
             android:id="@+id/action_nav_houses_to_nav_character"
             app:destination="@id/nav_character" />
+        <action
+            android:id="@+id/action_nav_houses_self"
+            app:destination="@id/nav_houses" />
+        <argument
+            android:name="showOnlyFavorite"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </fragment>
     <fragment
         android:id="@+id/nav_character"
@@ -41,5 +48,9 @@
         <action
             android:id="@+id/action_nav_character_self"
             app:destination="@id/nav_character" />
+        <argument
+            android:name="isBookmarked"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </fragment>
 </navigation>
