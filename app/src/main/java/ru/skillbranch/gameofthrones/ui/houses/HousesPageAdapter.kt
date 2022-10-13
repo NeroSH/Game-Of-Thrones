@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package ru.skillbranch.gameofthrones.ui.houses
 
 import androidx.fragment.app.Fragment
@@ -9,8 +7,9 @@ import ru.skillbranch.gameofthrones.data.local.entities.HouseType
 import ru.skillbranch.gameofthrones.ui.houses.house.HouseFragment
 
 
-class HousesPageAdapter(fragmentManager: FragmentManager, private val showBookmarked: Boolean)
-    : FragmentPagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+@Suppress("DEPRECATION")
+class HousesPageAdapter(fragmentManager: FragmentManager, private val showBookmarked: Boolean) :
+    FragmentPagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
     override fun getItem(position: Int): Fragment {
         return HouseFragment.newInstance(HouseType.values()[position].title, showBookmarked)

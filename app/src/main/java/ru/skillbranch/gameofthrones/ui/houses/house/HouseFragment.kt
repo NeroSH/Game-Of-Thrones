@@ -1,35 +1,40 @@
 package ru.skillbranch.gameofthrones.ui.houses.house
 
 import android.os.Bundle
-import android.view.*
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import android.widget.SearchView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.fragment_house.*
+import by.kirich1409.viewbindingdelegate.viewBinding
 import ru.skillbranch.gameofthrones.R
-import ru.skillbranch.gameofthrones.data.local.entities.CharacterItem
 import ru.skillbranch.gameofthrones.data.local.entities.HouseType
+import ru.skillbranch.gameofthrones.databinding.FragmentHouseBinding
+import ru.skillbranch.gameofthrones.ui.character.CharactersAdapter
 import ru.skillbranch.gameofthrones.ui.houses.HousesFragmentDirections
 
 /**
  * A simple [Fragment] subclass.
  */
-class HouseFragment : Fragment() {
+class HouseFragment : Fragment(R.layout.fragment_house) {
+    private val binding by viewBinding(FragmentHouseBinding::bind)
+    private val houseViewModel: HouseViewModel by viewModels { HouseViewModelFactory(houseName) }
+
     private lateinit var charactersAdapter: CharactersAdapter
-    private lateinit var houseViewModel: HouseViewModel
+
+    private var houseName = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        val houseName = arguments?.getString(HOUSE_NAME) ?: HouseType.STARK.title
+        houseName = arguments?.getString(HOUSE_NAME) ?: HouseType.STARK.title
         val showBookmarked = arguments?.getBoolean(ONLY_FAVORITE) ?: false
 
-        val vmFactory = HouseViewModelFactory(houseName)
         charactersAdapter = CharactersAdapter {
             val action = HousesFragmentDirections.actionNavHousesToNavCharacter(
                 it.id,
@@ -39,16 +44,15 @@ class HouseFragment : Fragment() {
             )
             findNavController().navigate(action)
         }
-        houseViewModel = ViewModelProviders.of(this, vmFactory).get(HouseViewModel::class.java)
         if (showBookmarked) {
-            houseViewModel.getFavoriteCharacters().observe(this, Observer<List<CharacterItem>> {
+            houseViewModel.getFavoriteCharacters().observe(this) {
                 charactersAdapter.submitList(it)
-            })
+            }
         }
         else {
-            houseViewModel.getCharacters().observe(this, Observer<List<CharacterItem>> {
+            houseViewModel.getCharacters().observe(this) {
                 charactersAdapter.submitList(it)
-            })
+            }
         }
     }
 
@@ -79,22 +83,14 @@ class HouseFragment : Fragment() {
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_house, container, false)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        recycler_characters.apply {
+        binding.recyclerCharacters.apply {
             adapter = charactersAdapter
             layoutManager = LinearLayoutManager(context)
             addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
         }
-        recycler_characters.addItemDecoration(
+        binding.recyclerCharacters.addItemDecoration(
             DividerItemDecoration(
                 this.context,
                 DividerItemDecoration.VERTICAL

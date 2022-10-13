@@ -26,10 +26,10 @@ class CharacterViewModel(private val characterId: String) : ViewModel() {
 
 class CharacterViewModelFactory(private val characterId: String) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CharacterViewModel::class.java)) {
             return CharacterViewModel(characterId) as T
         }
-        throw  IllegalArgumentException("unknown ViewModel class")
+        throw IllegalArgumentException("unknown ViewModel class")
     }
 }

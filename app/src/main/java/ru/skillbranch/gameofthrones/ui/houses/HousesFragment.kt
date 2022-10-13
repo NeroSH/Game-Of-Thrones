@@ -12,9 +12,11 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navOptions
+import by.kirich1409.viewbindingdelegate.viewBinding
+import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.tabs.TabLayout
-import kotlinx.android.synthetic.main.fragment_houses.*
 import ru.skillbranch.gameofthrones.R
+import ru.skillbranch.gameofthrones.databinding.FragmentHousesBinding
 import ru.skillbranch.gameofthrones.ui.RootActivity
 import kotlin.math.hypot
 import kotlin.math.max
@@ -22,7 +24,8 @@ import kotlin.math.max
 /**
  * A simple [Fragment] subclass.
  */
-class HousesFragment : Fragment() {
+class HousesFragment : Fragment(R.layout.fragment_houses) {
+    private val binding by viewBinding(FragmentHousesBinding::bind)
     private val args: HousesFragmentArgs by navArgs()
     private lateinit var colors: Array<Int>
     private lateinit var housesPageAdapter: HousesPageAdapter
@@ -79,32 +82,27 @@ class HousesFragment : Fragment() {
         return super.onOptionsItemSelected(item)
     }
 
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_houses, container, false)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (requireActivity() as RootActivity).setSupportActionBar(toolbar)
+        (requireActivity() as RootActivity).setSupportActionBar(binding.toolbar)
 
         if (currentColor != -1)
-            appbar.setBackgroundColor(currentColor)
-        view_pager.adapter = housesPageAdapter
-        with(tabs) {
-            setupWithViewPager(view_pager)
+            binding.appbar.setBackgroundColor(currentColor)
+        binding.viewPager.adapter = housesPageAdapter
+        with(binding.tabs) {
+            setupWithViewPager(binding.viewPager)
             addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
                 override fun onTabReselected(p0: TabLayout.Tab?) {}
                 override fun onTabUnselected(p0: TabLayout.Tab?) {}
 
                 override fun onTabSelected(tab: TabLayout.Tab?) {
                     val position = tab?.position ?: 0
+                    val appBarColor =
+                        (binding.appbar.background as? MaterialShapeDrawable)?.let {
+                            it.fillColor?.defaultColor
+                        } ?: (binding.appbar.background as? ColorDrawable)?.color
 
-                    if ((appbar.background as ColorDrawable).color != colors[position]) {
+                    if (appBarColor != colors[position]) {
                         val rect = Rect()
                         val tabView = tab?.view as View
                         tabView.postDelayed(
@@ -125,22 +123,22 @@ class HousesFragment : Fragment() {
     private fun animateAppbarReval(position: Int, centerX: Int, centerY: Int) {
         val endRadius = max(
             hypot(centerX.toDouble(), centerY.toDouble()),
-            hypot(appbar.width.toDouble() - centerX.toDouble(), centerY.toDouble())
+            hypot(binding.appbar.width.toDouble() - centerX.toDouble(), centerY.toDouble())
         )
-        with(reveal_view) {
+        with(binding.revealView) {
             visibility = View.VISIBLE
             setBackgroundColor(colors[position])
         }
         ViewAnimationUtils.createCircularReveal(
-            reveal_view,
+            binding.revealView,
             centerX,
             centerY,
             0f,
             endRadius.toFloat()
         ).apply {
             doOnEnd {
-                appbar?.setBackgroundColor(colors[position])
-                reveal_view?.visibility = View.INVISIBLE
+                binding.appbar.setBackgroundColor(colors[position])
+                binding.revealView.visibility = View.INVISIBLE
             }
             start()
         }

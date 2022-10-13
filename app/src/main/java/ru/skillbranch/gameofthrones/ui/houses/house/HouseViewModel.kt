@@ -33,11 +33,12 @@ class HouseViewModel(private val houseName: String) : ViewModel() {
     }
 }
 
+@Suppress("UNCHECKED_CAST")
 class HouseViewModelFactory(private val houseName: String) : ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(HouseViewModel::class.java)) {
             return HouseViewModel(houseName) as T
         }
-        throw  IllegalArgumentException("unknown ViewModel class")
+        throw IllegalArgumentException("unknown ViewModel class")
     }
 }

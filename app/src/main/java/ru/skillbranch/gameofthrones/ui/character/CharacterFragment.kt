@@ -1,32 +1,42 @@
 package ru.skillbranch.gameofthrones.ui.character
 
 import android.os.Bundle
-import android.view.*
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.*
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navOptions
+import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.fragment_character.*
 import ru.skillbranch.gameofthrones.R
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterFull
 import ru.skillbranch.gameofthrones.data.local.entities.HouseType
+import ru.skillbranch.gameofthrones.databinding.FragmentCharacterBinding
 import ru.skillbranch.gameofthrones.ui.RootActivity
 
 /**
  * A simple [Fragment] subclass.
  */
-class CharacterFragment : Fragment() {
+class CharacterFragment : Fragment(R.layout.fragment_character) {
+    private val binding by viewBinding(FragmentCharacterBinding::bind)
     private val args: CharacterFragmentArgs by navArgs()
-    private lateinit var characterViewModel: CharacterViewModel
+    private val characterViewModel: CharacterViewModel by viewModels {
+        CharacterViewModelFactory(
+            args.characterId
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        characterViewModel =
-            ViewModelProviders.of(this, CharacterViewModelFactory(args.characterId))
-                .get(CharacterViewModel::class.java)
+
+        // Inflate the layout for this fragment
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -76,16 +86,6 @@ class CharacterFragment : Fragment() {
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        setHasOptionsMenu(true)
-        return inflater.inflate(R.layout.fragment_character, container, false)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -95,78 +95,79 @@ class CharacterFragment : Fragment() {
         val scrimDark = houseType.darkColor
 
         val rootActivity = requireActivity() as RootActivity
-        rootActivity.setSupportActionBar(toolbar)
+        rootActivity.setSupportActionBar(binding.toolbar)
         rootActivity.supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             title = args.title
         }
-        iv_arms.setImageResource(arms)
-        with(collapsing_layout) {
+        binding.ivArms.setImageResource(arms)
+        with(binding.collapsingLayout) {
             setBackgroundResource(scrim)
             setContentScrimResource(scrim)
             setStatusBarScrimResource(scrimDark)
         }
 
-        collapsing_layout.post { collapsing_layout.requestLayout() }
+        binding.collapsingLayout.post { binding.collapsingLayout.requestLayout() }
 
         characterViewModel.getCharacter()
             .observe(viewLifecycleOwner, Observer<CharacterFull> { character ->
                 if (character == null) return@Observer
+                with(binding) {
 
-                val iconColor = requireContext().getColor(houseType.accentColor)
-                listOf(tv_words_label, tv_born_label, tv_titles_label, tv_aliases_label)
-                    .forEach { it.compoundDrawables.first().setTint(iconColor) }
-
-                tv_words.text = character.words
-                tv_born.text = character.born
-                tv_titles.text = character.titles
-                    .filter { it.isNotEmpty() }
-                    .joinToString(separator = "\n")
-                tv_aliases.text = character.aliases
-                    .filter { it.isNotEmpty() }
-                    .joinToString(separator = "\n")
-
-                character.father?.let {
-                    group_father.visibility = View.VISIBLE
-                    btn_father.text = it.name
-                    val action =
-                        CharacterFragmentDirections.actionNavCharacterSelf(
-                            it.id,
-                            it.house,
-                            it.name,
-                            it.is_bookmarked
-                        )
-                    btn_father.setOnClickListener { findNavController().navigate(action) }
-                }
-                character.mother?.let {
-                    group_mother.visibility = View.VISIBLE
-                    btn_mother.text = it.name
-                    val action =
-                        CharacterFragmentDirections.actionNavCharacterSelf(
-                            it.id,
-                            it.house,
-                            it.name,
-                            it.is_bookmarked
-                        )
-                    btn_mother.setOnClickListener { findNavController().navigate(action) }
-                }
-                if (character.died.isNotBlank()) {
-                    Snackbar.make(
-                        coordinator,
-                        "Died in ${character.died}",
-                        Snackbar.LENGTH_INDEFINITE
+                    val iconColor = requireContext().getColor(houseType.accentColor)
+                    listOf(
+                        tvWordsLabel,
+                        tvBornLabel,
+                        tvTitlesLabel,
+                        tvAliasesLabel
                     )
-                        .show()
+                        .forEach { it.compoundDrawables.first().setTint(iconColor) }
+
+                    tvWords.text = character.words
+                    tvBorn.text = character.born
+                    tvTitles.text = character.titles
+                        .filter { it.isNotEmpty() }
+                        .joinToString(separator = "\n")
+                    tvAliases.text = character.aliases
+                        .filter { it.isNotEmpty() }
+                        .joinToString(separator = "\n")
+
+                    character.father?.let {
+                        groupFather.visibility = View.VISIBLE
+                        btnFather.text = it.name
+                        val action =
+                            CharacterFragmentDirections.actionNavCharacterSelf(
+                                it.id,
+                                it.house,
+                                it.name,
+                                it.is_bookmarked
+                            )
+                        btnFather.setOnClickListener { findNavController().navigate(action) }
+                    }
+                    character.mother?.let {
+                        groupMother.visibility = View.VISIBLE
+                        btnMother.text = it.name
+                        val action =
+                            CharacterFragmentDirections.actionNavCharacterSelf(
+                                it.id,
+                                it.house,
+                                it.name,
+                                it.is_bookmarked
+                            )
+                        btnMother.setOnClickListener { findNavController().navigate(action) }
+                    }
+                    if (character.died.isNotBlank()) {
+                        Snackbar.make(
+                            coordinator,
+                            "Died in ${character.died}",
+                            Snackbar.LENGTH_INDEFINITE
+                        ).show()
+                    }
                 }
             })
-
     }
 
-    fun toggleIcon(state: Boolean, item: MenuItem) {
-        if (state)
-            item.setIcon(R.drawable.ic_bookmarked_24)
-        else
-            item.setIcon(R.drawable.ic_not_bookmarked_24)
+    private fun toggleIcon(state: Boolean, item: MenuItem) {
+        item.setIcon(if (state) R.drawable.ic_bookmarked_24 else R.drawable.ic_not_bookmarked_24)
     }
-
 }

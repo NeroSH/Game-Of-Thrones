@@ -3,9 +3,10 @@ package ru.skillbranch.gameofthrones.extensions
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
+import android.view.View
+import android.view.ViewGroup
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-
 
 @Suppress("DEPRECATION")
 val Context.isNetworkAvailable: Boolean
@@ -49,4 +50,18 @@ fun <T, A, B> LiveData<A>.combineAndCompute(other: LiveData<B>, onChange : (A,B)
     return  result
 }
 
-
+fun View.applyMargin(
+    start: Int? = null,
+    top: Int? = null,
+    end: Int? = null,
+    bottom: Int? = null
+) {
+    if (layoutParams is ViewGroup.MarginLayoutParams) {
+        layoutParams = (layoutParams as ViewGroup.MarginLayoutParams).apply {
+            marginStart = start ?: leftMargin
+            topMargin = top ?: topMargin
+            marginEnd = end ?: rightMargin
+            bottomMargin = bottom ?: bottomMargin
+        }
+    }
+}
