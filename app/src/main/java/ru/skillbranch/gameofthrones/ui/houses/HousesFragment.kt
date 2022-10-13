@@ -2,12 +2,15 @@ package ru.skillbranch.gameofthrones.ui.houses
 
 import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.os.Bundle
 import android.view.*
 import android.widget.CheckedTextView
 import android.widget.SearchView
 import androidx.annotation.ColorInt
 import androidx.core.animation.doOnEnd
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -17,6 +20,7 @@ import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.tabs.TabLayout
 import ru.skillbranch.gameofthrones.R
 import ru.skillbranch.gameofthrones.databinding.FragmentHousesBinding
+import ru.skillbranch.gameofthrones.extensions.applyMargin
 import ru.skillbranch.gameofthrones.ui.RootActivity
 import kotlin.math.hypot
 import kotlin.math.max
@@ -86,6 +90,18 @@ class HousesFragment : Fragment(R.layout.fragment_houses) {
         super.onViewCreated(view, savedInstanceState)
         (requireActivity() as RootActivity).setSupportActionBar(binding.toolbar)
 
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+
+            activity?.window?.let {
+                ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { view, insets ->
+                    val barsInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+                    val statusBarHeight = barsInsets.top
+                    view.applyMargin(top = statusBarHeight)
+
+                    insets
+                }
+            }
+        }
         if (currentColor != -1)
             binding.appbar.setBackgroundColor(currentColor)
         binding.viewPager.adapter = housesPageAdapter
