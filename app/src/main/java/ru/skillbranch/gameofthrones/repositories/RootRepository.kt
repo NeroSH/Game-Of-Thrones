@@ -50,31 +50,27 @@ object RootRepository {
      * @param result - колбек содержащий в себе список данных о доме и персонажей в нем (Дом - Список Персонажей в нем)
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    suspend fun needHouseWithCharacters(vararg houseNames: String): List<Pair<HouseRes, List<CharacterRes>>> {
-        val result = mutableListOf<Pair<HouseRes, List<CharacterRes>>>()
-        val houses = getNeedHouses(*houseNames)
-        scope.launch {
-            houses.forEach { house ->
-                var i = 0
-                val characters = mutableListOf<CharacterRes>()
-                result.add(house to characters)
-                house.members.forEach { character ->
-                    launch(CoroutineName("character $character")) {
+    suspend fun needHouseWithCharacters(
+        vararg houseNames: String
+    ): List<Pair<HouseRes, List<CharacterRes>>> = coroutineScope {
+        getNeedHouses(*houseNames).mapIndexed { index, house ->
+            async {
+                house to house.members.map { character ->
+                    async {
                         api.character(character)
                             .apply { houseId = house.shortName }
-                            .also { characters.add(it) }
-                        i++
-                        if (BuildConfig.DEBUG) {
-                            Log.d(
-                                "fetching house",
-                                "complete coroutine $i/${house.swornMembers.size} ${house.name}"
-                            )
-                        }
+                            .also {
+                                if (BuildConfig.DEBUG) {
+                                    Log.d(
+                                        "fetching house",
+                                        "complete coroutine $index/${house.swornMembers.size} ${house.name}"
+                                    )
+                                }
+                            }
                     }
-                }
+                }.awaitAll()
             }
-        }.join()
-        return result
+        }.awaitAll()
     }
 
     suspend fun sync() {
