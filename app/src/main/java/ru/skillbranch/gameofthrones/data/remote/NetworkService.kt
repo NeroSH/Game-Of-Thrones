@@ -1,30 +1,39 @@
 package ru.skillbranch.gameofthrones.data.remote
 
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import ru.skillbranch.gameofthrones.AppConfig
+import ru.skillbranch.gameofthrones.BuildConfig
 
+@Suppress("KotlinConstantConditions")
 object NetworkService {
-    val api : RestService by lazy {
-        val moshi = Moshi.Builder()
-            .add(KotlinJsonAdapterFactory())
-            .build()
+    private val json = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+    }
+    private val contentType = "application/json".toMediaType()
 
-        val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.NONE
-        }
+    val api: RestService by lazy {
 
         val client = OkHttpClient().newBuilder()
-            .addInterceptor(logging)
+            .apply {
+                if (BuildConfig.DEBUG) {
+                    addInterceptor(HttpLoggingInterceptor().apply {
+                        level = HttpLoggingInterceptor.Level.BASIC
+                    })
+                }
+            }
             .build()
 
         val retrofit = Retrofit.Builder()
             .client(client)
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .addConverterFactory(json.asConverterFactory(contentType))
+            .addCallAdapterFactory(CoroutineCallAdapterFactory())
             .baseUrl(AppConfig.BASE_URL)
             .build()
 

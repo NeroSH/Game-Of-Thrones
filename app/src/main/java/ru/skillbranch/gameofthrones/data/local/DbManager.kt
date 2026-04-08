@@ -26,14 +26,14 @@ object DbManager {
     entities = [House::class, Character::class],
     version = AppDatabase.DATABASE_VERSION,
     exportSchema = false,
-    views = [CharacterItem::class, CharacterFull::class]
+    views = [CharacterItem::class]
 )
 
 @TypeConverters(GoTConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     companion object {
         const val DATABASE_NAME = BuildConfig.APPLICATION_ID + ".db"
-        const val DATABASE_VERSION = 2
+        const val DATABASE_VERSION = 3
     }
 
     abstract fun houseDao() : HouseDao

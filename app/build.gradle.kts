@@ -1,9 +1,20 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.ksp)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.navigation.safeargs)
 }
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        freeCompilerArgs = listOf("-XXLanguage:+ContextParameters")
+    }
+}
+
+val localProperties = gradleLocalProperties(rootDir, providers)
 
 android {
     namespace = "ru.skillbranch.gameofthrones"
@@ -12,6 +23,25 @@ android {
     buildFeatures {
         buildConfig = true
         viewBinding = true
+    }
+
+    signingConfigs {
+        listOf("release").forEach { config ->
+            /**
+             * 1. Create root/app/.jks file
+             * 2. Create following fields in local.properties
+             *      `keyAlias`
+             *      `keyPassword`
+             *      `storeFile`
+             *      `storePassword`
+             */
+            create(config) {
+                keyAlias = localProperties.getProperty("keyAlias")
+                keyPassword = localProperties.getProperty("keyPassword")
+                storeFile = file(localProperties.getProperty("storeFile"))
+                storePassword = localProperties.getProperty("storePassword")
+            }
+        }
     }
 
     defaultConfig {
@@ -26,11 +56,12 @@ android {
 
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
-                    getDefaultProguardFile("proguard-android-optimize.txt"),
-                    "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
             )
         }
     }
@@ -60,21 +91,17 @@ dependencies {
 
     // Retrofit
     implementation(libs.retrofit)
-    implementation(libs.converter.moshi)
+    implementation(libs.retrofit.kotlin.serialization)
+    implementation(libs.retrofit.kotlin.coroutinesAdapter)
 
-    // Coroutines
+    // Kotlin
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
-
-    // Retrofit Coroutines Support
-    implementation(libs.retrofit2.kotlin.coroutines.adapter)
+    implementation(libs.kotlinx.serialization.json)
 
     // OkHttp3
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
-
-    //Moshi
-    implementation(libs.moshi.kotlin)
 
     // Room
     implementation(libs.androidx.room.runtime)

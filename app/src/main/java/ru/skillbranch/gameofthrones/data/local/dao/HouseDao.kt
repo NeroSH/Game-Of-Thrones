@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
 import ru.skillbranch.gameofthrones.data.local.entities.House
+import ru.skillbranch.gameofthrones.data.local.entities.HouseType
 
 @Dao
 interface HouseDao : BaseDao<House> {
@@ -12,6 +13,9 @@ interface HouseDao : BaseDao<House> {
 
     @Query("DELETE FROM houses")
     fun deleteTable()
+
+    @Query("SELECT words FROM houses WHERE id = :houseId")
+    fun getHouseWords(houseId: HouseType) : String?
 
     @Transaction
     fun upsert(objList : List<House>) {
