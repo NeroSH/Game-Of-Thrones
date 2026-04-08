@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import ru.skillbranch.gameofthrones.AppConfig
 import ru.skillbranch.gameofthrones.BuildConfig
 import ru.skillbranch.gameofthrones.data.local.DbManager
@@ -13,6 +15,7 @@ import ru.skillbranch.gameofthrones.data.local.entities.Character
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterFull
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterItem
 import ru.skillbranch.gameofthrones.data.local.entities.House
+import ru.skillbranch.gameofthrones.data.local.entities.RelativeCharacter
 import ru.skillbranch.gameofthrones.data.remote.NetworkService
 import ru.skillbranch.gameofthrones.data.remote.RestService
 import ru.skillbranch.gameofthrones.data.remote.res.CharacterRes
@@ -50,31 +53,27 @@ object RootRepository {
      * @param result - колбек содержащий в себе список данных о доме и персонажей в нем (Дом - Список Персонажей в нем)
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    suspend fun needHouseWithCharacters(vararg houseNames: String): List<Pair<HouseRes, List<CharacterRes>>> {
-        val result = mutableListOf<Pair<HouseRes, List<CharacterRes>>>()
-        val houses = getNeedHouses(*houseNames)
-        scope.launch {
-            houses.forEach { house ->
-                var i = 0
-                val characters = mutableListOf<CharacterRes>()
-                result.add(house to characters)
-                house.members.forEach { character ->
-                    launch(CoroutineName("character $character")) {
+    suspend fun needHouseWithCharacters(
+        vararg houseNames: String
+    ): List<Pair<HouseRes, List<CharacterRes>>> = coroutineScope {
+        getNeedHouses(*houseNames).mapIndexed { index, house ->
+            async {
+                house to house.members.map { character ->
+                    async {
                         api.character(character)
-                            .apply { houseId = house.shortName }
-                            .also { characters.add(it) }
-                        i++
-                        if (BuildConfig.DEBUG) {
-                            Log.d(
-                                "fetching house",
-                                "complete coroutine $i/${house.swornMembers.size} ${house.name}"
-                            )
-                        }
+                            .copy(houseId = house.shortName)
+                            .also {
+                                if (BuildConfig.DEBUG) {
+                                    Log.d(
+                                        "fetching house",
+                                        "complete coroutine $index/${house.swornMembers.size} ${house.name}"
+                                    )
+                                }
+                            }
                     }
-                }
+                }.awaitAll()
             }
-        }.join()
-        return result
+        }.awaitAll()
     }
 
     suspend fun sync() {
@@ -108,14 +107,48 @@ object RootRepository {
 
     suspend fun setBookmarked(characterId: String) {
         withContext(Dispatchers.IO) {
-            val char = characterDao.findCharacterObject(characterId)
+            val char = characterDao.findCharacterObject(characterId) ?: return@withContext
             char.isBookmarked = !char.isBookmarked
             characterDao.updateCharacter(char)
         }
     }
 
-    fun getCharacter(characterId: String): LiveData<CharacterFull> {
+    fun getCharacter(characterId: String): Flow<CharacterFull> {
         return characterDao.findCharacter(characterId)
+            .map {
+                var words = ""
+                var mother: RelativeCharacter? = null
+                var father: RelativeCharacter? = null
+                listOf(
+                    scope.launch {
+                        words = houseDao.getHouseWords(it.houseId) ?: ""
+                    },
+                    scope.launch {
+                        it.mother.takeIf { it.isNotEmpty() }?.let { motherId ->
+                            mother = characterDao.findRelativeCharacter(motherId)
+                        }
+                    },
+                    scope.launch {
+                        it.mother.takeIf { it.isNotEmpty() }?.let { motherId ->
+                            father = characterDao.findRelativeCharacter(motherId)
+                        }
+                    },
+                ).joinAll()
+
+                CharacterFull(
+                    id = it.id,
+                    name = it.name,
+                    words = words,
+                    born = it.born,
+                    died = it.died,
+                    titles = it.titles,
+                    aliases = it.aliases,
+                    isBookmarked = it.isBookmarked,
+                    house = it.houseId,
+                    mother = mother,
+                    father = father
+                )
+            }
     }
 
     /**

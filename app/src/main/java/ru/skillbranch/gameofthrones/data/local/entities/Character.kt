@@ -41,15 +41,6 @@ data class CharacterItem(
 
 )
 
-@DatabaseView(
-    """
-         SELECT characters.id, characters.name, characters.born, characters.died, characters.titles, characters.aliases, characters.is_bookmarked, characters.house_id, characters.mother, characters.father, houses.words, mother.name AS m_name, mother.id AS m_id, mother.house_id AS m_house, mother.is_bookmarked AS m_is_bookmarked, father.name AS f_name, father.id AS f_id, father.house_id AS f_house, father.is_bookmarked AS f_is_bookmarked
-         FROM characters
-         LEFT JOIN characters AS mother ON characters.mother = mother.id
-         LEFT JOIN characters AS father ON characters.father = father.id
-         INNER JOIN houses ON characters.house_id = houses.id
-    """
-)
 data class CharacterFull(
     val id: String,
     val name: String,
@@ -62,15 +53,15 @@ data class CharacterFull(
     var isBookmarked: Boolean,
     @ColumnInfo(name = "house_id")
     val house: HouseType, //rel
-    @Embedded(prefix = "m_")
-    val mother: RelativeCharacter?,
-    @Embedded(prefix = "f_")
-    val father: RelativeCharacter?
+    val mother: RelativeCharacter? = null,
+    val father: RelativeCharacter? = null
 )
 
 data class RelativeCharacter(
     val id: String,
     val name: String,
-    val house: String, //rel
-    val is_bookmarked: Boolean
+    @ColumnInfo(name = "house_id")
+    val houseId: HouseType, //rel
+    @ColumnInfo(name = "is_bookmarked")
+    val isBookmarked: Boolean
 )

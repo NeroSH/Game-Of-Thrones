@@ -8,16 +8,15 @@ import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navOptions
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.snackbar.Snackbar
 import ru.skillbranch.gameofthrones.R
-import ru.skillbranch.gameofthrones.data.local.entities.CharacterFull
 import ru.skillbranch.gameofthrones.data.local.entities.HouseType
 import ru.skillbranch.gameofthrones.databinding.FragmentCharacterBinding
+import ru.skillbranch.gameofthrones.extensions.collectLatestOnResume
 import ru.skillbranch.gameofthrones.ui.RootActivity
 
 /**
@@ -110,8 +109,7 @@ class CharacterFragment : Fragment(R.layout.fragment_character) {
         binding.collapsingLayout.post { binding.collapsingLayout.requestLayout() }
 
         characterViewModel.getCharacter()
-            .observe(viewLifecycleOwner, Observer<CharacterFull> { character ->
-                if (character == null) return@Observer
+            .collectLatestOnResume { character ->
                 with(binding) {
 
                     val iconColor = requireContext().getColor(houseType.accentColor)
@@ -120,8 +118,7 @@ class CharacterFragment : Fragment(R.layout.fragment_character) {
                         tvBornLabel,
                         tvTitlesLabel,
                         tvAliasesLabel
-                    )
-                        .forEach { it.compoundDrawables.first().setTint(iconColor) }
+                    ).forEach { it.compoundDrawables.firstOrNull()?.setTint(iconColor) }
 
                     tvWords.text = character.words
                     tvBorn.text = character.born
@@ -138,9 +135,9 @@ class CharacterFragment : Fragment(R.layout.fragment_character) {
                         val action =
                             CharacterFragmentDirections.actionNavCharacterSelf(
                                 it.id,
-                                it.house,
+                                it.houseId.title,
                                 it.name,
-                                it.is_bookmarked
+                                it.isBookmarked
                             )
                         btnFather.setOnClickListener { findNavController().navigate(action) }
                     }
@@ -150,9 +147,9 @@ class CharacterFragment : Fragment(R.layout.fragment_character) {
                         val action =
                             CharacterFragmentDirections.actionNavCharacterSelf(
                                 it.id,
-                                it.house,
+                                it.houseId.title,
                                 it.name,
-                                it.is_bookmarked
+                                it.isBookmarked
                             )
                         btnMother.setOnClickListener { findNavController().navigate(action) }
                     }
@@ -164,7 +161,7 @@ class CharacterFragment : Fragment(R.layout.fragment_character) {
                         ).show()
                     }
                 }
-            })
+            }
     }
 
     private fun toggleIcon(state: Boolean, item: MenuItem) {

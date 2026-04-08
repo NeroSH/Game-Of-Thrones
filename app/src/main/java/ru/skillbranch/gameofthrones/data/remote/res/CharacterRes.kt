@@ -1,46 +1,47 @@
 package ru.skillbranch.gameofthrones.data.remote.res
 
-import com.squareup.moshi.Json
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import ru.skillbranch.gameofthrones.data.local.entities.Character
 import ru.skillbranch.gameofthrones.data.local.entities.HouseType
 
+@Serializable
 data class CharacterRes(
-    @Json(name = "url")
+    @SerialName(value = "url")
     val url: String,
-    @Json(name = "name")
+    @SerialName(value = "name")
     val name: String,
-    @Json(name = "gender")
+    @SerialName(value = "gender")
     val gender: String,
-    @Json(name = "culture")
+    @SerialName(value = "culture")
     val culture: String,
-    @Json(name = "born")
+    @SerialName(value = "born")
     val born: String,
-    @Json(name = "died")
+    @SerialName(value = "died")
     val died: String,
-    @Json(name = "titles")
+    @SerialName(value = "titles")
     val titles: List<String> = listOf(),
-    @Json(name = "aliases")
+    @SerialName(value = "aliases")
     val aliases: List<String> = listOf(),
-    @Json(name = "father")
+    @SerialName(value = "father")
     val father: String,
-    @Json(name = "mother")
+    @SerialName(value = "mother")
     val mother: String,
-    @Json(name = "spouse")
+    @SerialName(value = "spouse")
     val spouse: String,
-    @Json(name = "allegiances")
+    @SerialName(value = "allegiances")
     val allegiances: List<String> = listOf(),
-    @Json(name = "books")
+    @SerialName(value = "books")
     val books: List<String> = listOf(),
-    @Json(name = "povBooks")
-    val povBooks: List<Any> = listOf(),
-    @Json(name = "tvSeries")
+    @SerialName(value = "tvSeries")
     val tvSeries: List<String> = listOf(),
-    @Json(name = "playedBy")
-    val playedBy: List<String> = listOf()
-//    @Json(name = "isBookmarked")
+    @SerialName(value = "playedBy")
+    val playedBy: List<String> = listOf(),
+    @Transient val houseId: String = ""
+//    @SerialName(value = "isBookmarked")
 //    var isBookmarked: Boolean = false
 ) : IRes {
-    lateinit var houseId: String
     override val id: String get() = url.lastSegment()
     override var isBookmarked: Boolean = false
     val fatherId get() = father.lastSegment()
@@ -48,19 +49,19 @@ data class CharacterRes(
 
     fun toCharacter(): Character {
         return Character(
-            url.lastSegment(),
-            name,
-            gender,
-            culture,
-            born,
-            died,
-            titles,
-            aliases,
-            father,
-            mother,
-            spouse,
-            HouseType.fromString(houseId),
-            isBookmarked
+            id = id,
+            name = name,
+            gender = gender,
+            culture = culture,
+            born = born,
+            died = died,
+            titles = titles,
+            aliases = aliases,
+            father = fatherId,
+            mother = motherId,
+            spouse = spouse,
+            houseId = HouseType.fromString(houseId),
+            isBookmarked = isBookmarked
         )
     }
 }

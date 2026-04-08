@@ -1,42 +1,42 @@
 package ru.skillbranch.gameofthrones.data.remote.res
 
-import com.squareup.moshi.Json
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import ru.skillbranch.gameofthrones.data.local.entities.House
 import ru.skillbranch.gameofthrones.data.local.entities.HouseType
 import ru.skillbranch.gameofthrones.extensions.dropLastUntil
 
+@Serializable
 data class HouseRes(
-    @Json(name = "url")
+    @SerialName(value = "url")
     val url: String,
-    @Json(name = "name")
+    @SerialName(value = "name")
     val name: String,
-    @Json(name = "region")
+    @SerialName(value = "region")
     val region: String,
-    @Json(name = "coatOfArms")
+    @SerialName(value = "coatOfArms")
     val coatOfArms: String,
-    @Json(name = "words")
+    @SerialName(value = "words")
     val words: String,
-    @Json(name = "titles")
+    @SerialName(value = "titles")
     val titles: List<String> = listOf(),
-    @Json(name = "seats")
+    @SerialName(value = "seats")
     val seats: List<String> = listOf(),
-    @Json(name = "currentLord")
+    @SerialName(value = "currentLord")
     val currentLord: String,
-    @Json(name = "heir")
+    @SerialName(value = "heir")
     val heir: String,
-    @Json(name = "overlord")
+    @SerialName(value = "overlord")
     val overlord: String,
-    @Json(name = "founded")
+    @SerialName(value = "founded")
     val founded: String,
-    @Json(name = "founder")
+    @SerialName(value = "founder")
     val founder: String,
-    @Json(name = "diedOut")
+    @SerialName(value = "diedOut")
     val diedOut: String,
-    @Json(name = "ancestralWeapons")
+    @SerialName(value = "ancestralWeapons")
     val ancestralWeapons: List<String> = listOf(),
-    @Json(name = "cadetBranches")
-    val cadetBranches: List<Any> = listOf(),
-    @Json(name = "swornMembers")
+    @SerialName(value = "swornMembers")
     val swornMembers: List<String> = listOf()
 ) : IRes {
     override var isBookmarked: Boolean = false

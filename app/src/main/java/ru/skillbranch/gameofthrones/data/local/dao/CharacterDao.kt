@@ -5,9 +5,11 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
 import ru.skillbranch.gameofthrones.data.local.entities.Character
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterFull
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterItem
+import ru.skillbranch.gameofthrones.data.local.entities.RelativeCharacter
 
 @Dao
 interface CharacterDao : BaseDao<Character> {
@@ -17,14 +19,18 @@ interface CharacterDao : BaseDao<Character> {
     @Query("SELECT * FROM CharacterItem WHERE house = :title")
     fun findCharacterList(title: String): List<CharacterItem>
 
-    @Query("SELECT * FROM CharacterFull WHERE id = :characterId")
-    fun findCharacter(characterId: String) : LiveData<CharacterFull>
-
-    @Query("SELECT * FROM CharacterFull WHERE id = :characterId")
-    fun findCharacterFull(characterId: String) : CharacterFull
+    @Query("SELECT * FROM characters WHERE id = :characterId")
+    fun findCharacter(characterId: String): Flow<Character>
 
     @Query("SELECT * FROM characters WHERE id = :characterId")
-    fun findCharacterObject(characterId: String) : Character
+    fun findCharacterFull(characterId: String): Character?
+
+    @Query("SELECT * FROM characters WHERE id = :characterId")
+    fun findCharacterObject(characterId: String): Character?
+
+    @Query("SELECT id, name, house_id, is_bookmarked " +
+            " FROM characters WHERE id = :characterId")
+    fun findRelativeCharacter(characterId: String): RelativeCharacter?
 
     //    fun findCharacterLiveData(characterId: String) : LiveData<Character>
     @Query("DELETE FROM characters")
